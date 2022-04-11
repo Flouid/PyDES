@@ -4,8 +4,26 @@ class DES:
     """A class to implement the DES system of encryption.
     Works by initializing with a 64-bit key. Any other length will cause errors.
     Keys are stored as a bitstring of length 64. This string is made by converting
-    each character to a bytestring and concatenating them all together."""
-    __key = str
+    each character to a bytestring and concatenating them all together.
+
+    DES uses a number of hardcoded tables to perform encryption and decryption.
+    These are stored as lists of indices representing which bit from the message or key
+    they represent. These tables are stored and loaded from an accompanying text file."""
+    __key = str             # key
+
+    # encryption/decryption tables
+    __ip = [int]            # initial permutation table
+    __fp = [int]            # final permutation table
+    __exp = [int]           # expansion function
+    __perm = [int]          # permutation table
+    __pc1 = [int]           # permuted choice 1
+    __pc2 = [int]           # permuted choice 2
+    __s_boxes = [[int]]     # s box tables
+
+    # key generation tables
+    __pt = [int]            # key permutation table
+    __brt = [int]           # bit rotation table
+    __kct = [int]           # key compression table
 
     def __init__(self, key: str):
         # the key MUST be 64-bits long, error if this isn't the case
@@ -20,8 +38,10 @@ class DES:
 
         # additional check to ensure that the resulting bitstring is exactly 64 bits
         assert len(bitstring) == 64
-
         self.__key = bitstring
+
+        # load the tables in from the text file
+
 
     def __str__(self):
         """An output method for the DES system for the purpose of debugging and validation."""
