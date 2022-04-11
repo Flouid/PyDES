@@ -1,4 +1,5 @@
 from utils import ingest_data
+from bitstring import Bitstring
 
 
 class DES:
@@ -10,7 +11,7 @@ class DES:
     DES uses a number of hardcoded tables to perform encryption and decryption.
     These are stored as lists of indices representing which bit from the message or key
     they represent. These tables are stored and loaded from an accompanying text file."""
-    __key = str             # key
+    __key = Bitstring       # key
 
     # encryption/decryption tables
     __ip = [int]            # initial permutation table
@@ -28,7 +29,7 @@ class DES:
 
     def __init__(self, key: str):
         # convert the key into a 64-bit bitstring
-        self.__key = self.__make_bitstring(key)
+        self.__key = Bitstring(key)
 
         # load the tables in from the text file
         rows = ingest_data('des_tables.txt', '\n')
@@ -68,18 +69,13 @@ class DES:
         return string
 
     @staticmethod
-    def __make_bitstring(m: str):
-        # bitstrings MUST be 64-bits long, error if this isn't the case
-        assert len(m) == 8
+    def chunk_message(m: str) -> [Bitstring]:
+        """Takes a full-length message and chunks it into a list of bitstrings.
+        The last bitstring is padded with special characters to make it the correct length."""
+        chunks = []
 
-        bitstring = ''
-        for c in m:
-            # convert the character to ascii integer, convert that to binary, and remove the leading '0b'
-            bytestring = bin(ord(c))[2:]
-            # zero-pad the front of the bytestring to guarantee exactly 8 bits
-            bitstring += ('0' * (8 - len(bytestring))) + bytestring
+        # process all complete chunks
+        for chunk in range(len(m) // 8):
+            chunks.append(Bitstring(m[(8 * chunk):(8 * chunk + 8)]))
 
-        # additional check to ensure that the resulting bitstring is exactly 64 bits
-        assert len(bitstring) == 64
-        return bitstring
-
+        return chunks

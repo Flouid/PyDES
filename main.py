@@ -6,7 +6,10 @@ def main():
     key = 'abcdefgh'
     des = DES(key)
 
-    print(des)
+    # print(des)
+
+    message = 'abcdefghzxcvbnm'
+    print(des.chunk_message(message))
 
 
 if __name__ == '__main__':
