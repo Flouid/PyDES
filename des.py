@@ -11,7 +11,7 @@ class DES:
     DES uses a number of hardcoded tables to perform encryption and decryption.
     These are stored as lists of indices representing which bit from the message or key
     they represent. These tables are stored and loaded from an accompanying text file."""
-    __key = Bitstring       # key
+    __key = [int]           # parity dropped, permuted key
 
     # encryption/decryption tables
     __ip = [int]            # initial permutation table
@@ -28,9 +28,6 @@ class DES:
     __kct = [int]           # key compression table
 
     def __init__(self, key: str):
-        # convert the key into a 64-bit bitstring
-        self.__key = Bitstring(key)
-
         # load the tables in from the text file
         rows = ingest_data('des_tables.txt', '\n')
 
@@ -49,6 +46,15 @@ class DES:
         self.__kpt = list(map(int, rows[15].split()))
         self.__brt = list(map(int, rows[16].split()))
         self.__kct = list(map(int, rows[17].split()))
+
+        # convert the key into a 64-bit bitstring
+        key_bitstring = Bitstring(key)
+        # use the key permutation table to create the main key which will be used for sub-keys
+        permuted_key = []
+        for i in self.__kpt:
+            permuted_key.append(key_bitstring[i])
+
+        self.__key = permuted_key
 
     def __str__(self):
         """An output method for the DES system for the purpose of debugging and validation."""
@@ -103,13 +109,20 @@ class DES:
             l1, r1 = ip[:32], ip[32:]
 
             # run the 16 rounds of feistel ciphers
-            for r in range(1, 17):
+            for r in range(16):
                 # define l0 and r0 as the output from the previous round
                 l0, r0 = l1, r1
 
-    def __f_box(self, r, bits):
+    def __f_box(self, r: int, bits: [int]) -> [int]:
         """Runs the appropriate f-box for a given round on an input block of 32 bits."""
         # run the 32-bit block through the expansion table
         exp = []
         for i in self.__exp:
             exp.append(bits[i-1])
+
+    def sub_key(self, r: int) -> [int]:
+        """Create the appropriate sub-key for the current round number."""
+        # split the main key into two halves
+        l, r = self.__key[:28], self.__key[28:]
+        # get the number of left rotations from the bit rotation table for the current round
+        rotations = self.__brt[r]
