@@ -17,12 +17,12 @@ class DES:
     __fp = [int]            # final permutation table
     __exp = [int]           # expansion function
     __perm = [int]          # permutation table
-    __pc1 = [int]           # permuted choice 1
+    __pc1 = [[int]]         # permuted choice 1
     __pc2 = [int]           # permuted choice 2
     __s_boxes = [[int]]     # s box tables
 
     # key generation tables
-    __pt = [int]            # key permutation table
+    __kpt = [int]           # key permutation table
     __brt = [int]           # bit rotation table
     __kct = [int]           # key compression table
 
@@ -43,11 +43,37 @@ class DES:
 
         # load the tables in from the text file
         rows = ingest_data('des_tables.txt', '\n')
-        for row in rows:
-            print(row.split(' '))
 
-        print(rows)
+        # store each table
+        self.__ip = list(map(int, rows[0].split()))
+        self.__fp = list(map(int, rows[1].split()))
+        self.__exp = list(map(int, rows[2].split()))
+        self.__perm = list(map(int, rows[3].split()))
+        self.__pc1 = [list(map(int, rows[4].split())), list(map(int, rows[5].split()))]
+        self.__pc2 = list(map(int, rows[6].split()))
+        # s boxes
+        self.__s_boxes = []
+        for i in range(7, 15):
+            self.__s_boxes.append(list(map(int, rows[i].split())))
+        # key generation tables
+        self.__kpt = list(map(int, rows[15].split()))
+        self.__brt = list(map(int, rows[16].split()))
+        self.__kct = list(map(int, rows[17].split()))
 
     def __str__(self):
         """An output method for the DES system for the purpose of debugging and validation."""
-        return f'{len(self.__key)}:\t{self.__key}'
+        string = ''
+        string += f'key = {len(self.__key)}:\t{self.__key}\n'
+        string += f'initial permutation = {len(self.__ip)}:\t{self.__ip}\n'
+        string += f'final permutation = {len(self.__fp)}:\t{self.__fp}\n'
+        string += f'expansion table = {len(self.__exp)}:\t{self.__exp}\n'
+        string += f'permutation table = {len(self.__perm)}:\t{self.__perm}\n'
+        string += f'pc1 right = {len(self.__pc1[0])}:\t{self.__pc1[0]}\n'
+        string += f'pc1 left = {len(self.__pc1[1])}:\t{self.__pc1[1]}\n'
+        for i in range(len(self.__s_boxes)):
+            string += f's_box{i+1} = {len(self.__s_boxes[i])}:\t{self.__s_boxes[i]}\n'
+        string += f'key permutation table = {len(self.__kpt)}:\t{self.__kpt}\n'
+        string += f'bit rotation table = {len(self.__brt)}:\t{self.__brt}\n'
+        string += f'key compression table = {len(self.__kct)}:\t{self.__kct}\n'
+
+        return string
