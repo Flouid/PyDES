@@ -27,19 +27,8 @@ class DES:
     __kct = [int]           # key compression table
 
     def __init__(self, key: str):
-        # the key MUST be 64-bits long, error if this isn't the case
-        assert len(key) == 8
-
-        bitstring = ''
-        for c in key:
-            # convert the character to ascii integer, convert that to binary, and remove the leading '0b'
-            bytestring = bin(ord(c))[2:]
-            # zero-pad the front of the bytestring to guarantee exactly 8 bits
-            bitstring += ('0' * (8 - len(bytestring))) + bytestring
-
-        # additional check to ensure that the resulting bitstring is exactly 64 bits
-        assert len(bitstring) == 64
-        self.__key = bitstring
+        # convert the key into a 64-bit bitstring
+        self.__key = self.__make_bitstring(key)
 
         # load the tables in from the text file
         rows = ingest_data('des_tables.txt', '\n')
@@ -77,3 +66,20 @@ class DES:
         string += f'key compression table = {len(self.__kct)}:\t{self.__kct}\n'
 
         return string
+
+    @staticmethod
+    def __make_bitstring(m: str):
+        # bowstrings MUST be 64-bits long, error if this isn't the case
+        assert len(m) == 8
+
+        bitstring = ''
+        for c in m:
+            # convert the character to ascii integer, convert that to binary, and remove the leading '0b'
+            bytestring = bin(ord(c))[2:]
+            # zero-pad the front of the bytestring to guarantee exactly 8 bits
+            bitstring += ('0' * (8 - len(bytestring))) + bytestring
+
+        # additional check to ensure that the resulting bitstring is exactly 64 bits
+        assert len(bitstring) == 64
+        return bitstring
+
