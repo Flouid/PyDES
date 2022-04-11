@@ -85,3 +85,25 @@ class DES:
             chunks.append(Bitstring(m[-(8-pad):] + (chr(0) * pad)))
 
         return chunks
+
+    def encrypt(self, m: str):
+        """The main public-facing function to encrypt a message.
+        Uses the DES encryption standard and a custom bitstring data type.
+        Encrypts blocks one at a time using 16 rounds of feistel ciphers."""
+        blocks = self.__chunk_message(m)
+        encrypted_blocks = []
+
+        for block in blocks:
+            # run the initial permutation, the result is a list of integers encoded as bits
+            ip = []
+            for i in self.__ip:
+                ip.append(block[i-1])
+
+            # initialize the input blocks prior to running feistel ciphers
+            l1, r1 = ip[:32], ip[32:]
+
+            # run the 16 rounds of feistel ciphers
+            for r in range(1, 17):
+                # define l0 and r0 as the output from the previous round
+                l0, r0 = l1, r1
+
