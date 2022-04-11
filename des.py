@@ -69,13 +69,19 @@ class DES:
         return string
 
     @staticmethod
-    def chunk_message(m: str) -> [Bitstring]:
+    def __chunk_message(m: str) -> [Bitstring]:
         """Takes a full-length message and chunks it into a list of bitstrings.
-        The last bitstring is padded with special characters to make it the correct length."""
+        The last bitstring is padded with null characters to make it the correct length."""
         chunks = []
 
         # process all complete chunks
         for chunk in range(len(m) // 8):
             chunks.append(Bitstring(m[(8 * chunk):(8 * chunk + 8)]))
+
+        # process a possible partial chunk at the end
+        pad = (8 - len(m) % 8) % 8
+        if pad > 0:
+            # take the last 8-pad characters and zero pad a new chunk with null characters
+            chunks.append(Bitstring(m[-(8-pad):] + (chr(0) * pad)))
 
         return chunks
