@@ -69,7 +69,7 @@ class DES:
 
     @staticmethod
     def __make_bitstring(m: str):
-        # bowstrings MUST be 64-bits long, error if this isn't the case
+        # bitstrings MUST be 64-bits long, error if this isn't the case
         assert len(m) == 8
 
         bitstring = ''
