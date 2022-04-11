@@ -99,7 +99,7 @@ class DES:
             for i in self.__ip:
                 ip.append(block[i-1])
 
-            # initialize the input blocks prior to running feistel ciphers
+            # initialize the input blocks prior to running feistel rounds
             l1, r1 = ip[:32], ip[32:]
 
             # run the 16 rounds of feistel ciphers
@@ -107,3 +107,9 @@ class DES:
                 # define l0 and r0 as the output from the previous round
                 l0, r0 = l1, r1
 
+    def __f_box(self, r, bits):
+        """Runs the appropriate f-box for a given round on an input block of 32 bits."""
+        # run the 32-bit block through the expansion table
+        exp = []
+        for i in self.__exp:
+            exp.append(bits[i-1])
