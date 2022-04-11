@@ -14,9 +14,9 @@ class DES:
         bitstring = ''
         for c in key:
             # convert the character to ascii integer, convert that to binary, and remove the leading '0b'
-            temp = bin(ord(c))[2:]
-            # zero-pad the front of the character to guarantee exactly 8 bits
-            bitstring += ('0' * (8 - len(temp))) + temp
+            bytestring = bin(ord(c))[2:]
+            # zero-pad the front of the bytestring to guarantee exactly 8 bits
+            bitstring += ('0' * (8 - len(bytestring))) + bytestring
 
         # additional check to ensure that the resulting bitstring is exactly 64 bits
         assert len(bitstring) == 64
