@@ -6,7 +6,8 @@ class Bitstring:
     __bits = str
 
     def __init__(self, string):
-        """Converts an 8-character message chunk into a 64-bit bitstring."""
+        """Converts an 8-character message chunk into a 64-bit bitstring.
+        Uses parity bits to pad 7-bit ascii codes up to full bytes."""
         # bitstrings MUST be 64-bits long, error if this isn't the case
         assert len(string) == 8
 
