@@ -1,3 +1,4 @@
+from utils import ingest_data
 
 
 class DES:
@@ -41,7 +42,11 @@ class DES:
         self.__key = bitstring
 
         # load the tables in from the text file
+        rows = ingest_data('des_tables.txt', '\n')
+        for row in rows:
+            print(row.split(' '))
 
+        print(rows)
 
     def __str__(self):
         """An output method for the DES system for the purpose of debugging and validation."""
