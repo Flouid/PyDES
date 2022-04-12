@@ -42,7 +42,7 @@ class DES:
         self.__kct = list(map(int, rows[14].split()))
 
         # convert the key into a 64-bit bitstring
-        key_bitstring = self.__bitstring(key)
+        key_bitstring = self.__string_to_bits(key)
         # use the key permutation table to create the main key which will be used for sub-keys
         permuted_key = []
         for i in self.__kpt:
@@ -67,7 +67,7 @@ class DES:
         return string
 
     @staticmethod
-    def __bitstring(string: str):
+    def __string_to_bits(string: str):
         """Converts an 8-character message chunk into a 64-bit bitstring.
         Uses parity bits to pad 7-bit ascii codes to create full bytes."""
         # bitstrings MUST be 64-bits long, error if this isn't the case
@@ -105,13 +105,13 @@ class DES:
 
         # process all complete chunks
         for chunk in range(len(m) // 8):
-            chunks.append(self.__bitstring(m[(8 * chunk):(8 * chunk + 8)]))
+            chunks.append(self.__string_to_bits(m[(8 * chunk):(8 * chunk + 8)]))
 
         # process a possible partial chunk at the end
         pad = (8 - len(m) % 8) % 8
         if pad > 0:
             # take the last 8-pad characters and zero pad a new chunk with null characters
-            chunks.append(self.__bitstring(m[-(8-pad):] + (chr(0) * pad)))
+            chunks.append(self.__string_to_bits(m[-(8 - pad):] + (chr(0) * pad)))
 
         return chunks
 
