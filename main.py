@@ -10,8 +10,6 @@ def main():
 
     des.encrypt(message)
 
-    des.sub_key(1)
-
 
 if __name__ == '__main__':
     start = time()

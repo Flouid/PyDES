@@ -19,7 +19,6 @@ class DES:
     __exp = [int]           # expansion function
     __perm = [int]          # permutation table
     __pc1 = [[int]]         # permuted choice 1
-    __pc2 = [int]           # permuted choice 2
     __s_boxes = [[int]]     # s box tables
 
     # key generation tables
@@ -37,15 +36,14 @@ class DES:
         self.__exp = list(map(int, rows[2].split()))
         self.__perm = list(map(int, rows[3].split()))
         self.__pc1 = [list(map(int, rows[4].split())), list(map(int, rows[5].split()))]
-        self.__pc2 = list(map(int, rows[6].split()))
         # s boxes
         self.__s_boxes = []
-        for i in range(7, 15):
+        for i in range(6, 14):
             self.__s_boxes.append(list(map(int, rows[i].split())))
         # key generation tables
-        self.__kpt = list(map(int, rows[15].split()))
-        self.__brt = list(map(int, rows[16].split()))
-        self.__kct = list(map(int, rows[17].split()))
+        self.__kpt = list(map(int, rows[14].split()))
+        self.__brt = list(map(int, rows[15].split()))
+        self.__kct = list(map(int, rows[16].split()))
 
         # convert the key into a 64-bit bitstring
         key_bitstring = Bitstring(key)
@@ -115,14 +113,58 @@ class DES:
 
     def __f_box(self, r: int, bits: [int]) -> [int]:
         """Runs the appropriate f-box for a given round on an input block of 32 bits."""
-        # run the 32-bit block through the expansion table
+        # run the 32-bit block through the expansion table to create a 48-bit block
         exp = []
         for i in self.__exp:
             exp.append(bits[i-1])
 
-    def sub_key(self, r: int) -> [int]:
+        # get the 48-bit sub-key for the round
+        sub_key = self.__sub_key(r)
+
+        # xor the sub-key with the expanded input block
+        block = [exp[i] ^ sub_key[i] for i in range(48)]
+
+        # split the block into 8 6-bit sub-blocks and run each through their respective s-box
+        # compose the resulting 4-bit blocks into a 32-bit output block
+        out = []
+        for s in range(8):
+            # isolate row and column indices
+            row_bits = [block[6 * s], block[6 * s + 5]]        # first and last bits of the block
+            col_bits = [block[6*s + 1: 6*s + 5]]               # middle four bits of the block
+            # convert the bits to integer indices
+            row = int('0b' + ''.join(map(chr, row_bits)), 2)
+            col = int('0b' + ''.join(map(chr, col_bits)), 2)
+            # get the 4-bit integer in the correct s-box specified by the row and column indices
+            val = self.__s_boxes[s][row * 16 + col]
+
+            # convert the value into a bitstring of exactly length 4 by zero-padding the front
+            bitstring = bin(val)[2:]
+            bitstring = '0' * (4 - len(bitstring)) + bitstring
+            # append each bit of the resulting bitstring to the output block
+            for bit in bitstring:
+                out.append(int(bit))
+
+        # run the output block through the permutation table to get a final output
+        final = []
+        for i in self.__perm:
+            final.append(out[i-1])
+
+        return final
+
+    def __sub_key(self, r: int) -> [int]:
         """Create the appropriate sub-key for the current round number."""
         # split the main key into two halves
-        l, r = self.__key[:28], self.__key[28:]
+        l0, r0 = self.__key[:28], self.__key[28:]
         # get the number of left rotations from the bit rotation table for the current round
         rotations = self.__brt[r]
+
+        # apply the bit rotation table to the left and right halves and then compose them
+        brt = [l0[(i + rotations) % 28] for i in range(28)] \
+            + [r0[(i + rotations) % 28] for i in range(28)]
+
+        # use the key compression table to get the sub-key for the round
+        sub_key = []
+        for i in self.__kct:
+            sub_key.append(brt[i-1])
+
+        return sub_key
