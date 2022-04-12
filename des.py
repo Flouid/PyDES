@@ -67,7 +67,7 @@ class DES:
         return string
 
     @staticmethod
-    def __string_to_bits(string: str):
+    def __string_to_bits(string: str) -> [int]:
         """Converts an 8-character message chunk into a 64-bit bitstring.
         Uses parity bits to pad 7-bit ascii codes to create full bytes."""
         # bitstrings MUST be 64-bits long, error if this isn't the case
@@ -98,6 +98,27 @@ class DES:
         # return the bitstring as a list of integers
         return list(map(int, bitstring))
 
+    @staticmethod
+    def __bits_to_string(bits: [int]) -> str:
+        """Converts a 64-bit bitstring to an 8-character message chunk.
+        Drops parity bits and uses 8 7-bit ascii codes for the mapping."""
+        # bitstrings MUST be 64-bits long, error if this isn't the case
+        assert len(bits) == 64
+
+        string = ''
+        for chunk in range(8):
+            # grab each byte as a list of 8 bits from the input
+            byte = bits[chunk * 8: chunk * 8 + 8]
+            # convert the byte to a string and strip the last (parity) bit
+            bytestring = '0b' + ''.join(map(str, byte[:8]))
+            # convert the byte to an ascii code and add the character it represents to the output string
+            string += chr(int(bytestring[2:], 2))
+
+        # make sure the length of the string is 8 as a sanity check
+        assert len(string) == 8
+
+        return string
+
     def __chunk_message(self, m: str) -> [[int]]:
         """Takes a full-length message and chunks it into a list of bitstrings.
         The last bitstring is padded with null characters to make it the correct length."""
@@ -114,6 +135,11 @@ class DES:
             chunks.append(self.__string_to_bits(m[-(8 - pad):] + (chr(0) * pad)))
 
         return chunks
+
+    def __merge_message(self, blocks: [[int]]) -> str:
+        """Reverses the chunk-message operation by taking a list of bitstrings and merging them to a string.
+        The last string will be padded with null characters that get chopped off later."""
+        return ''.join([self.__bits_to_string(bitstring) for bitstring in blocks])
 
     def encrypt(self, m: str):
         """The main public-facing function to encrypt a message.
@@ -140,7 +166,9 @@ class DES:
             # compose and append the resulting output to the encrypted blocks
             encrypted_blocks.append(l1 + r1)
 
-        return encrypted_blocks
+        # merge the message from bitstrings back into an encrypted string
+        # the output will have a length that is a multiple of 8, only take as many characters as were in the input
+        return self.__merge_message(encrypted_blocks)[:len(m)]
 
     def __f_box(self, r: int, bits: [int]) -> [int]:
         """Runs the appropriate f-box for a given round on an input block of 32 bits."""

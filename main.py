@@ -6,9 +6,12 @@ def main():
     key = 'abcdefgh'
     des = DES(key)
 
-    message = 'this is a decently long test message of no particular length'
+    message = 'This is a decently long test message of no particular length.'
 
-    print(des.encrypt(message))
+    encrypted_message = des.encrypt(message)
+
+    print(len(message), message)
+    print(len(encrypted_message), encrypted_message)
 
 
 if __name__ == '__main__':
