@@ -221,8 +221,14 @@ class DES:
                 # run the feistel cipher using the f-box for the round
                 l1, r1 = r0, [l0[i] ^ self.__f_box(r, r0)[i] for i in range(32)]
 
-            # compose and append the resulting output to the encrypted blocks
-            encrypted_blocks.append(l1 + r1)
+            # compose the two halves and run them through the final permutation
+            composition = l1 + r1
+            fp = []
+            for i in self.__fp:
+                fp.append(composition[i-1])
+
+            # append the result to the encrypted blocks list
+            encrypted_blocks.append(fp)
 
         # merge the message from bitstrings back into an encrypted string
         # the output will have a length that is a multiple of 8, only take as many characters as were in the input
