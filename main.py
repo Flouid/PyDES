@@ -3,7 +3,7 @@ from des import DES
 
 
 def main():
-    key = 'abcdefgh'
+    key = 'fuck me!'
     des = DES(key)
 
     message = 'This is a decently long test message of no particular length.'
