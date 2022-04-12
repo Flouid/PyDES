@@ -199,11 +199,19 @@ class DES:
 
         return sub_key
 
-    def encrypt(self, m: str):
-        """The main public-facing function to encrypt a message.
-        Uses the DES encryption standard and encrypts blocks one at a time using 16 rounds of feistel ciphers."""
+    def __big_f(self, m: str, reverse: bool):
+        """The main public-facing function to encrypt or decrypt a message.
+        Uses the DES encryption standard and blocks are processed one at a time using 16 rounds of feistel ciphers.
+        Whether or not the function encrypts or decrypts depends on the order of the rounds.
+        This is determined using a flag that is passed into the function by public facing helper  methods."""
         blocks = self.__chunk_message(m)
         encrypted_blocks = []
+
+        # determine whether or not the function will encrypt or decrypt the message
+        if reverse:
+            rounds = reversed(range(16))
+        else:
+            rounds = range(16)
 
         for block in blocks:
             # run the initial permutation, the result is a list of integers encoded as bits
@@ -215,7 +223,7 @@ class DES:
             l1, r1 = ip[:32], ip[32:]
 
             # run the 16 rounds of feistel ciphers
-            for r in range(16):
+            for r in rounds:
                 # define l0 and r0 as the output from the previous round
                 l0, r0 = l1, r1
                 # run the feistel cipher using the f-box for the round
@@ -233,3 +241,11 @@ class DES:
         # merge the message from bitstrings back into an encrypted string
         # the output will have a length that is a multiple of 8, only take as many characters as were in the input
         return self.__merge_message(encrypted_blocks)[:len(m)]
+
+    def encrypt(self, m: str):
+        """Public facing method to allow encryption using the big F box."""
+        return self.__big_f(m, False)
+
+    def decrypt(self, m: str):
+        """Public facing method to allow decryption using the big F box."""
+        return self.__big_f(m, True)
