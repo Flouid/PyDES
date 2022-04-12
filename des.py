@@ -141,35 +141,6 @@ class DES:
         The last string will be padded with null characters that get chopped off later."""
         return ''.join([self.__bits_to_string(bitstring) for bitstring in blocks])
 
-    def encrypt(self, m: str):
-        """The main public-facing function to encrypt a message.
-        Uses the DES encryption standard and encrypts blocks one at a time using 16 rounds of feistel ciphers."""
-        blocks = self.__chunk_message(m)
-        encrypted_blocks = []
-
-        for block in blocks:
-            # run the initial permutation, the result is a list of integers encoded as bits
-            ip = []
-            for i in self.__ip:
-                ip.append(block[i-1])
-
-            # initialize the input blocks prior to running feistel rounds
-            l1, r1 = ip[:32], ip[32:]
-
-            # run the 16 rounds of feistel ciphers
-            for r in range(16):
-                # define l0 and r0 as the output from the previous round
-                l0, r0 = l1, r1
-                # run the feistel cipher using the f-box for the round
-                l1, r1 = r0, [l0[i] ^ self.__f_box(r, r0)[i] for i in range(32)]
-
-            # compose and append the resulting output to the encrypted blocks
-            encrypted_blocks.append(l1 + r1)
-
-        # merge the message from bitstrings back into an encrypted string
-        # the output will have a length that is a multiple of 8, only take as many characters as were in the input
-        return self.__merge_message(encrypted_blocks)[:len(m)]
-
     def __f_box(self, r: int, bits: [int]) -> [int]:
         """Runs the appropriate f-box for a given round on an input block of 32 bits."""
         # run the 32-bit block through the expansion table to create a 48-bit block
@@ -227,3 +198,32 @@ class DES:
             sub_key.append(brt[i-1])
 
         return sub_key
+
+    def encrypt(self, m: str):
+        """The main public-facing function to encrypt a message.
+        Uses the DES encryption standard and encrypts blocks one at a time using 16 rounds of feistel ciphers."""
+        blocks = self.__chunk_message(m)
+        encrypted_blocks = []
+
+        for block in blocks:
+            # run the initial permutation, the result is a list of integers encoded as bits
+            ip = []
+            for i in self.__ip:
+                ip.append(block[i-1])
+
+            # initialize the input blocks prior to running feistel rounds
+            l1, r1 = ip[:32], ip[32:]
+
+            # run the 16 rounds of feistel ciphers
+            for r in range(16):
+                # define l0 and r0 as the output from the previous round
+                l0, r0 = l1, r1
+                # run the feistel cipher using the f-box for the round
+                l1, r1 = r0, [l0[i] ^ self.__f_box(r, r0)[i] for i in range(32)]
+
+            # compose and append the resulting output to the encrypted blocks
+            encrypted_blocks.append(l1 + r1)
+
+        # merge the message from bitstrings back into an encrypted string
+        # the output will have a length that is a multiple of 8, only take as many characters as were in the input
+        return self.__merge_message(encrypted_blocks)[:len(m)]
