@@ -1,5 +1,4 @@
 from utils import ingest_data
-from bitstring import Bitstring
 
 
 class DES:
@@ -44,7 +43,7 @@ class DES:
         self.__kct = list(map(int, rows[14].split()))
 
         # convert the key into a 64-bit bitstring
-        key_bitstring = Bitstring(key)
+        key_bitstring = self.__bitstring(key)
         # use the key permutation table to create the main key which will be used for sub-keys
         permuted_key = []
         for i in self.__kpt:
@@ -69,27 +68,57 @@ class DES:
         return string
 
     @staticmethod
-    def __chunk_message(m: str) -> [Bitstring]:
+    def __bitstring(string: str):
+        """Converts an 8-character message chunk into a 64-bit bitstring.
+        Uses parity bits to pad 7-bit ascii codes up to full bytes."""
+        # bitstrings MUST be 64-bits long, error if this isn't the case
+        assert len(string) == 8
+
+        bitstring = ''
+        for c in string:
+            # convert the character to ascii integer, convert that to binary, and remove the leading '0b'
+            bytestring = bin(ord(c))[2:]
+            # zero pad front of the bytestring up to seven bits
+            bytestring = '0' * (7 - len(bytestring)) + bytestring
+
+            # calculate and add the parity bit so that parity is always odd
+            parity = 0
+            for b in bytestring:
+                parity += b == '1'
+            # if the parity is odd, add a zero to keep it that way, otherwise make it odd
+            if parity & 1:
+                bytestring += '0'
+            else:
+                bytestring += '1'
+
+            # append the byte to the overall bitstring
+            bitstring += bytestring
+
+        # additional check to ensure that the resulting bitstring is exactly 64 bits
+        assert len(bitstring) == 64
+        # return the bitstring as a list of integers
+        return list(map(int, bitstring))
+
+    def __chunk_message(self, m: str) -> [[int]]:
         """Takes a full-length message and chunks it into a list of bitstrings.
         The last bitstring is padded with null characters to make it the correct length."""
         chunks = []
 
         # process all complete chunks
         for chunk in range(len(m) // 8):
-            chunks.append(Bitstring(m[(8 * chunk):(8 * chunk + 8)]))
+            chunks.append(self.__bitstring(m[(8 * chunk):(8 * chunk + 8)]))
 
         # process a possible partial chunk at the end
         pad = (8 - len(m) % 8) % 8
         if pad > 0:
             # take the last 8-pad characters and zero pad a new chunk with null characters
-            chunks.append(Bitstring(m[-(8-pad):] + (chr(0) * pad)))
+            chunks.append(self.__bitstring(m[-(8-pad):] + (chr(0) * pad)))
 
         return chunks
 
     def encrypt(self, m: str):
         """The main public-facing function to encrypt a message.
-        Uses the DES encryption standard and a custom bitstring data type.
-        Encrypts blocks one at a time using 16 rounds of feistel ciphers."""
+        Uses the DES encryption standard and encrypts blocks one at a time using 16 rounds of feistel ciphers."""
         blocks = self.__chunk_message(m)
         encrypted_blocks = []
 
