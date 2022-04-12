@@ -8,7 +8,7 @@ def main():
 
     message = 'this is a decently long test message of no particular length'
 
-    des.encrypt(message)
+    print(des.encrypt(message))
 
 
 if __name__ == '__main__':

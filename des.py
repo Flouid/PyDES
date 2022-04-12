@@ -110,6 +110,13 @@ class DES:
             for r in range(16):
                 # define l0 and r0 as the output from the previous round
                 l0, r0 = l1, r1
+                # run the feistel cipher using the f-box for the round
+                l1, r1 = r0, [l0[i] ^ self.__f_box(r, r0)[i] for i in range(32)]
+
+            # compose and append the resulting output to the encrypted blocks
+            encrypted_blocks.append(l1 + r1)
+
+        return encrypted_blocks
 
     def __f_box(self, r: int, bits: [int]) -> [int]:
         """Runs the appropriate f-box for a given round on an input block of 32 bits."""
@@ -130,10 +137,10 @@ class DES:
         for s in range(8):
             # isolate row and column indices
             row_bits = [block[6 * s], block[6 * s + 5]]        # first and last bits of the block
-            col_bits = [block[6*s + 1: 6*s + 5]]               # middle four bits of the block
+            col_bits = block[6*s + 1: 6*s + 5]                 # middle four bits of the block
             # convert the bits to integer indices
-            row = int('0b' + ''.join(map(chr, row_bits)), 2)
-            col = int('0b' + ''.join(map(chr, col_bits)), 2)
+            row = int('0b' + ''.join(map(str, row_bits)), 2)
+            col = int('0b' + ''.join(map(str, col_bits)), 2)
             # get the 4-bit integer in the correct s-box specified by the row and column indices
             val = self.__s_boxes[s][row * 16 + col]
 
