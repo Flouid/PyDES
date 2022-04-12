@@ -18,7 +18,6 @@ class DES:
     __fp = [int]            # final permutation table
     __exp = [int]           # expansion function
     __perm = [int]          # permutation table
-    __pc1 = [[int]]         # permuted choice 1
     __s_boxes = [[int]]     # s box tables
 
     # key generation tables
@@ -61,8 +60,6 @@ class DES:
         string += f'final permutation = {len(self.__fp)}:\t{self.__fp}\n'
         string += f'expansion table = {len(self.__exp)}:\t{self.__exp}\n'
         string += f'permutation table = {len(self.__perm)}:\t{self.__perm}\n'
-        string += f'pc1 right = {len(self.__pc1[0])}:\t{self.__pc1[0]}\n'
-        string += f'pc1 left = {len(self.__pc1[1])}:\t{self.__pc1[1]}\n'
         for i in range(len(self.__s_boxes)):
             string += f's_box{i+1} = {len(self.__s_boxes[i])}:\t{self.__s_boxes[i]}\n'
         string += f'key permutation table = {len(self.__kpt)}:\t{self.__kpt}\n'
