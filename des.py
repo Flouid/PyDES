@@ -30,20 +30,19 @@ class DES:
         # load the tables in from the text file
         rows = ingest_data('des_tables.txt', '\n')
 
-        # store each table
+        # f-box tables
         self.__ip = list(map(int, rows[0].split()))
         self.__fp = list(map(int, rows[1].split()))
         self.__exp = list(map(int, rows[2].split()))
         self.__perm = list(map(int, rows[3].split()))
-        self.__pc1 = [list(map(int, rows[4].split())), list(map(int, rows[5].split()))]
         # s boxes
         self.__s_boxes = []
-        for i in range(6, 14):
+        for i in range(4, 12):
             self.__s_boxes.append(list(map(int, rows[i].split())))
         # key generation tables
-        self.__kpt = list(map(int, rows[14].split()))
-        self.__brt = list(map(int, rows[15].split()))
-        self.__kct = list(map(int, rows[16].split()))
+        self.__kpt = list(map(int, rows[12].split()))
+        self.__brt = list(map(int, rows[13].split()))
+        self.__kct = list(map(int, rows[14].split()))
 
         # convert the key into a 64-bit bitstring
         key_bitstring = Bitstring(key)
