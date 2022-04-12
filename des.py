@@ -4,8 +4,7 @@ from utils import ingest_data
 class DES:
     """A class to implement the DES system of encryption.
     Works by initializing with a 64-bit key. Any other length will cause errors.
-    Keys are stored as a bitstring of length 64. This string is made by converting
-    each character to a bytestring and concatenating them all together.
+    Keys are stored as a bitstring of length 64. Bitstrings are stored as a list of 64 integers.
 
     DES uses a number of hardcoded tables to perform encryption and decryption.
     These are stored as lists of indices representing which bit from the message or key
