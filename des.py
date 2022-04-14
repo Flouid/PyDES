@@ -44,11 +44,7 @@ class DES:
         # convert the key into a 64-bit bitstring
         key_bitstring = self.__string_to_bits(key)
         # use the key permutation table to create the main key which will be used for sub-keys
-        permuted_key = []
-        for i in self.__kpt:
-            permuted_key.append(key_bitstring[i])
-
-        self.__key = permuted_key
+        self.__key = [key_bitstring[i-1] for i in self.__kpt]
 
     def __str__(self):
         """An output method for the DES system for the purpose of debugging and validation."""
