@@ -135,7 +135,7 @@ class DES:
         # process a possible partial chunk at the end
         pad = (8 - len(m) % 8) % 8
         if pad > 0:
-            # take the last 8-pad characters and zero pad a new chunk with null characters
+            # take the last 8-pad characters and pad a new chunk with null characters
             chunks.append(self.__string_to_bits(m[-(8 - pad):] + (chr(0) * pad)))
 
         return chunks
@@ -148,9 +148,7 @@ class DES:
     def __f_box(self, r: int, bits: [int]) -> [int]:
         """Runs the appropriate f-box for a given round on an input block of 32 bits."""
         # run the 32-bit block through the expansion table to create a 48-bit block
-        exp = []
-        for i in self.__exp:
-            exp.append(bits[i-1])
+        exp = [bits[i-1] for i in self.__exp]
 
         # get the 48-bit sub-key for the round
         sub_key = self.__sub_key(r)
@@ -179,11 +177,7 @@ class DES:
                 out.append(int(bit))
 
         # run the output block through the permutation table to get a final output
-        final = []
-        for i in self.__perm:
-            final.append(out[i-1])
-
-        return final
+        return [out[i-1] for i in self.__perm]
 
     def __sub_key(self, r: int) -> [int]:
         """Create the appropriate sub-key for the current round number."""
@@ -193,15 +187,11 @@ class DES:
         rotations = self.__brt[r]
 
         # apply the bit rotation table to the left and right halves and then compose them
-        brt = [l0[(i + rotations) % 28] for i in range(28)] \
-            + [r0[(i + rotations) % 28] for i in range(28)]
+        buffer = [l0[(i + rotations) % 28] for i in range(28)] \
+               + [r0[(i + rotations) % 28] for i in range(28)]
 
         # use the key compression table to get the sub-key for the round
-        sub_key = []
-        for i in self.__kct:
-            sub_key.append(brt[i-1])
-
-        return sub_key
+        return [buffer[i-1] for i in self.__kct]
 
     def __big_f(self, m: str, reverse: bool):
         """The main public-facing function to encrypt or decrypt a message.
@@ -219,12 +209,10 @@ class DES:
 
         for block in blocks:
             # run the initial permutation, the result is a list of integers encoded as bits
-            ip = []
-            for i in self.__ip:
-                ip.append(block[i-1])
+            buffer = [block[i-1] for i in self.__ip]
 
             # initialize the input blocks prior to running feistel rounds
-            l1, r1 = ip[:32], ip[32:]
+            l1, r1 = buffer[:32], buffer[32:]
 
             # run the 16 rounds of feistel ciphers
             for r in rounds:
@@ -234,17 +222,15 @@ class DES:
                 l1, r1 = r0, [l0[i] ^ self.__f_box(r, r0)[i] for i in range(32)]
 
             # compose the two halves and run them through the final permutation
-            composition = l1 + r1
-            fp = []
-            for i in self.__fp:
-                fp.append(composition[i-1])
+            buffer = l1 + r1
+            buffer = [buffer[i-1] for i in self.__fp]
 
             # append the result to the encrypted blocks list
-            encrypted_blocks.append(fp)
+            encrypted_blocks.append(buffer)
 
         # merge the message from bitstrings back into an encrypted string
         # the output will have a length that is a multiple of 8, only take as many characters as were in the input
-        return self.__merge_message(encrypted_blocks)[:len(m)]
+        return self.__merge_message(encrypted_blocks)
 
     def encrypt(self, m: str):
         """Public facing method to allow encryption using the big F box."""
