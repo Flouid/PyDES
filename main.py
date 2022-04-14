@@ -3,10 +3,11 @@ from des import DES
 
 
 def main():
-    key = 'fuck me!'
+    key = 'test key'
     des = DES(key)
 
-    message = 'This is a decently long test message of no particular length.'
+    # message = 'This is a decently long test message of no particular length.'
+    message = 'a'
     print(f'plaintext message:\n\tlength:\t{len(message)}\n\ttext:\t{message}')
 
     encrypted_message = des.encrypt(message)
