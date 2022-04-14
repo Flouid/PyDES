@@ -71,18 +71,11 @@ class DES:
         """Convert a character to a byte represented as a list of 8 bits."""
         b = [0] * 8
         ascii_val = ord(c)
-        parity = 0
 
-        # perform bitwise operations to populate the list of bits ignoring the lowest bit
-        for i in reversed(range(7)):
-            if ascii_val & 1:
-                b[i] = 1
-                parity += 1
+        # perform bitwise operations to populate the list of bits
+        for i in reversed(range(8)):
+            b[i] = ascii_val & 1
             ascii_val = ascii_val >> 1
-
-        # if the parity is even, flip the last bit to keep it odd
-        if not parity & 1:
-            b[7] = 1
 
         return b
 
@@ -91,11 +84,10 @@ class DES:
         """Convert a byte represented as a list of 8 bits to a character."""
         ascii_val = 0
 
-        # ignore the last bit as it is used for parity
-        for i in reversed(range(7)):
-            # if the bit at i is high, add 2^i to the ascii val
+        for i in reversed(range(8)):
+            # if the bit at i is high, add 2 raised to the correct power
             if b[i]:
-                ascii_val += pow(2, 6-i)
+                ascii_val += pow(2, 7-i)
 
         # cast the ascii value to a char and return
         return chr(ascii_val)
