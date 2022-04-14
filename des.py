@@ -80,15 +80,17 @@ class DES:
             # zero pad front of the bytestring up to seven bits
             bytestring = '0' * (7 - len(bytestring)) + bytestring
 
-            # calculate and add the parity bit so that parity is always odd
-            parity = 0
-            for b in bytestring:
-                parity += b == '1'
-            # if the parity is odd, add a zero to keep it that way, otherwise make it odd
-            if parity & 1:
-                bytestring += '0'
-            else:
-                bytestring += '1'
+            # only add a parity bit if this hasn't already been added
+            if len(bytestring) == 7:
+                # calculate and add the parity bit so that parity is always odd
+                parity = 0
+                for b in bytestring:
+                    parity += b == '1'
+                # if the parity is odd, add a zero to keep it that way, otherwise make it odd
+                if parity & 1:
+                    bytestring += '0'
+                else:
+                    bytestring += '1'
 
             # append the byte to the overall bitstring
             bitstring += bytestring
