@@ -67,56 +67,66 @@ class DES:
         return string
 
     @staticmethod
-    def __string_to_bits(string: str) -> [int]:
-        """Converts an 8-character message chunk into a 64-bit bitstring.
-        Uses parity bits to pad 7-bit ascii codes to create full bytes."""
-        # bitstrings MUST be 64-bits long, error if this isn't the case
-        assert len(string) == 8
+    def __char_to_byte(c: chr) -> [int]:
+        """Convert a character to a byte represented as a list of 8 bits."""
+        b = [0] * 8
+        ascii_val = ord(c)
+        parity = 0
 
-        bitstring = ''
-        for c in string:
-            # convert the character to ascii integer, convert that to binary, and remove the leading '0b'
-            bytestring = bin(ord(c))[2:]
-            # zero pad front of the bytestring up to seven bits
-            bytestring = '0' * (7 - len(bytestring)) + bytestring
+        # perform bitwise operations to populate the list of bits ignoring the lowest bit
+        for i in reversed(range(7)):
+            if ascii_val & 1:
+                b[i] = 1
+                parity += 1
+            ascii_val = ascii_val >> 1
 
-            # only add a parity bit if this hasn't already been added
-            if len(bytestring) == 7:
-                # calculate and add the parity bit so that parity is always odd
-                parity = 0
-                for b in bytestring:
-                    parity += b == '1'
-                # if the parity is odd, add a zero to keep it that way, otherwise make it odd
-                if parity & 1:
-                    bytestring += '0'
-                else:
-                    bytestring += '1'
+        # if the parity is even, flip the last bit to keep it odd
+        if not parity & 1:
+            b[7] = 1
 
-            # append the byte to the overall bitstring
-            bitstring += bytestring
-
-        # additional check to ensure that the resulting bitstring is exactly 64 bits
-        assert len(bitstring) == 64
-        # return the bitstring as a list of integers
-        return list(map(int, bitstring))
+        return b
 
     @staticmethod
-    def __bits_to_string(bits: [int]) -> str:
-        """Converts a 64-bit bitstring to an 8-character message chunk.
+    def __byte_to_char(b: [int]) -> chr:
+        """Convert a byte represented as a list of 8 bits to a character."""
+        ascii_val = 0
+
+        # ignore the last bit as it is used for parity
+        for i in reversed(range(7)):
+            # if the bit at i is high, add 2^i to the ascii val
+            if b[i]:
+                ascii_val += pow(2, 6-i)
+
+        # cast the ascii value to a char and return
+        return chr(ascii_val)
+
+    def __string_to_bits(self, string: str) -> [int]:
+        """Convert a set of 8 characters into a list of 64-bits by using 7-bit ascii and a parity bit."""
+        # sanity check that the input string is exactly 8 characters
+        assert len(string) == 8
+
+        # initialize an empty array and append the byte-mapping of each character in the string
+        bits = []
+        for c in string:
+            bits += self.__char_to_byte(c)
+
+        # another sanity check that the resulting mapping was 64 bits
+        assert len(bits) == 64
+
+        return bits
+
+    def __bits_to_string(self, bits: [int]) -> str:
+        """Converts a list of 64 bits to an 8-character string.
         Drops parity bits and uses 8 7-bit ascii codes for the mapping."""
-        # bitstrings MUST be 64-bits long, error if this isn't the case
+        # sanity check that the input is precisely 64 bits long
         assert len(bits) == 64
 
         string = ''
-        for chunk in range(8):
-            # grab each byte as a list of 8 bits from the input
-            byte = bits[chunk * 8: chunk * 8 + 8]
-            # convert the byte to a string and strip the last (parity) bit
-            bytestring = '0b' + ''.join(map(str, byte[:8]))
-            # convert the byte to an ascii code and add the character it represents to the output string
-            string += chr(int(bytestring[2:], 2))
+        for i in range(8):
+            byte = bits[i * 8: i * 8 + 8]
+            string += self.__byte_to_char(byte)
 
-        # make sure the length of the string is 8 as a sanity check
+        # additional sanity check that the output is precisely 8 characters long
         assert len(string) == 8
 
         return string
