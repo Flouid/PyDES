@@ -82,8 +82,7 @@ class DES:
 
         for i in reversed(range(8)):
             # if the bit at i is high, add 2 raised to the correct power
-            if b[i]:
-                ascii_val += pow(2, 7-i)
+            ascii_val += b[i] * pow(2, 7-i)
 
         # cast the ascii value to a char and return
         return chr(ascii_val)
@@ -193,7 +192,7 @@ class DES:
         """The main public-facing function to encrypt or decrypt a message.
         Uses the DES encryption standard and blocks are processed one at a time using 16 rounds of feistel ciphers.
         Whether or not the function encrypts or decrypts depends on the order of the rounds.
-        This is determined using a flag that is passed into the function by public facing helper  methods."""
+        This is determined using a flag that is passed into the function by public facing helper methods."""
         blocks = self.__chunk_message(m)
         encrypted_blocks = []
 
