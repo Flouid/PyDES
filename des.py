@@ -71,7 +71,7 @@ class DES:
         # perform bitwise operations to populate the list of bits
         for i in reversed(range(8)):
             b[i] = ascii_val & 1
-            ascii_val = ascii_val >> 1
+            ascii_val >>= 1
 
         return b
 
